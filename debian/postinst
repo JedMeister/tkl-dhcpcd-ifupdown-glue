@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# postinst
+
+# Add header comment to /etc/dhcpcd.conf
+
+DHCPCD_CONF="/etc/dhcpcd.conf"
+HEADER="# Lines marked \"ifupdown-managed\" below are auto-generated - do not edit."
+
+case "$1" in
+    configure)
+        # scripts should already be executable - but doesn't hurt to be sure
+        chmod +x /etc/network/if-pre-up.d/dhcpcd-sync
+        chmod +x /etc/network/if-post-down.d/dhcpcd-sync
+
+        # dhcpcd.conf should exist as it's a hard "Depends" but let's be
+        # defensive
+        if [ ! -f "$DHCPCD_CONF" ]; then
+            echo "Warning: $DHCPCD_CONF not found, skipping header injection" >&2
+            exit 0
+        fi
+
+        if ! grep -qF "$HEADER" "$DHCPCD_CONF"; then
+            printf '\n%s\n' "$HEADER" >> "$DHCPCD_CONF"
+        fi
+    ;;
+esac
+
+# DEBHELPER injection shouldn't be needed but good packaging practice
+#DEBHELPER#
+
+exit 0

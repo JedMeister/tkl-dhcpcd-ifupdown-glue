@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# /etc/network/if-post-down.d/dhcpcd-sync
+#
+# Hook script provided by the 'tkl-dhcpcd-ifupdown-glue' package and part of
+# TurnKey GNU/Linux network configuration.
+#
+# Removes denyinterfaces entry when interface is deconfigured.
+# This ensures dhcp works again if the interface is later reconfigured to dhcp
+# without an ifup cycle (e.g. manual dhcpcd invocation).
+
+[ "$IFACE" = "lo" ] && exit 0
+[ "$ADDRFAM" != "inet" ] && [ "$ADDRFAM" != "inet6" ] && exit 0
+
+DHCPCD_CONF="/etc/dhcpcd.conf"
+
+case "$ADDRFAM" in
+    inet)  AF_TOKEN="ip4" ;;
+    inet6) AF_TOKEN="ip6" ;;
+    *)     exit 0 ;;
+esac
+
+MARKER="# ifupdown-managed: ${IFACE} ${AF_TOKEN}"
+sed -i "/^${MARKER}$/{N;d}" "$DHCPCD_CONF"
+
+exit 0

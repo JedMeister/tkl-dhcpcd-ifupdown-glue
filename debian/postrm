@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# postrm
+
+# Remove header comment from /etc/dhcpcd.conf (added by postinst script)
+
+DHCPCD_CONF="/etc/dhcpcd.conf"
+HEADER="# Lines marked \"ifupdown-managed\" below are auto-generated - do not edit."
+
+case "$1" in
+    remove|purge)
+        if [ -f "$DHCPCD_CONF" ]; then
+            # Remove all ifupdown-managed entry pairs (marker + denyinterfaces line)
+            sed -i '/^# ifupdown-managed: /{N;d}' "$DHCPCD_CONF"
+            # Remove the header comment
+            sed -i "/^${HEADER}$/d" "$DHCPCD_CONF"
+            # Remove any blank lines left at end of file (optional, cosmetic)
+            sed -i -e '/^$/N;/^\n$/d' "$DHCPCD_CONF"
+        fi
+    ;;
+esac
+
+# DEBHELPER injection shouldn't be needed but good packaging practice
+#DEBHELPER#
+
+exit 0
