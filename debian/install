@@ -1,2 +1,2 @@
-if-pre-up.d/dhcpcd-sync     etc/network/if-pre-up.d/dhcpcd-sync
-if-post-down.d/dhcpcd-sync  etc/network/if-post-down.d/dhcpcd-sync
+if-pre-up.d/dhcpcd-sync     etc/network/if-pre-up.d/
+if-post-down.d/dhcpcd-sync  etc/network/if-post-down.d/
