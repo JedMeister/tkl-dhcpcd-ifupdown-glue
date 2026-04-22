@@ -2,6 +2,8 @@ Source: tkl-dhcpcd-ifupdown-glue
 Section: net
 Priority: optional
 Maintainer: Jeremy Davis <jeremy@turnkeylinux.org>
+Build-Depends:
+ debhelper-compat (= 13),
 Standards-Version: 4.7.2
 Vcs-Git: https://github.com/turnkeylinux/tkl-dhcpcd-ifupdown-glue.git
 Vcs-Browser: https://github.com/turnkeylinux/tkl-dhcpcd-ifupdown-glue
