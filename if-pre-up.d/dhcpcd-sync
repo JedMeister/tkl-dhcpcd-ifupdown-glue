@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # /etc/network/if-pre-up.d/dhcpcd-sync
 #
@@ -8,40 +8,26 @@
 # Keeps dhcpcd.conf in sync with /etc/network/interfaces so that
 # interfaces configured as static are not also managed by dhcpcd.
 
-[ "$IFACE" = "lo" ] && exit 0
-[ "$ADDRFAM" != "inet" ] && [ "$ADDRFAM" != "inet6" ] && exit 0
+# shellcheck source=share/helper
+source /usr/share/tkl-dhcpcd-ifupdown-glue/helper
 
-DHCPCD_CONF="/etc/dhcpcd.conf"
+_log_info "if-pre-up hook running for $IFACE"
 
-# Map address family to a token we use in markers and denyinterfaces
-# dhcpcd uses "ip4" and "ip6" as address family suffixes in denyinterfaces
-case "$ADDRFAM" in
-    inet)  AF_TOKEN="ip4" ;;
-    inet6) AF_TOKEN="ip6" ;;
-    *)     exit 0 ;;
-esac
+_init "$IFACE"
 
-# The deny entry format dhcpcd understands per address family
-DENY_ENTRY="${AF_TOKEN}:${IFACE}"
-MARKER="# ifupdown-managed: ${IFACE} ${AF_TOKEN} - edit /etc/network/infaces"
+for info in _iface4_method _iface6_method; do
+    read -r ipv method <<<"$info"
+    # remove the entry if it exists regardless
+    remove_deny_entry "$IFACE" "$ipv"
+    if [[ "$method" == "dhcp" ]]; then
+        _log_info "$IFACE $ipv is dhcp - nothing to do"
+        continue
+    else
+        _log_info "$IFACE $ipv is ${method} - disabling dhcp"
+        add_deny_entry "$IFACE" "$ipv"
+    fi
+done
 
-remove_deny_entry() {
-    # Remove both the marker and the denyinterfaces line for this iface
-    sed -i "/^${MARKER}$/{N;d}" "$DHCPCD_CONF"
-}
-
-add_deny_entry() {
-    remove_deny_entry
-    printf '\n%s\ndenyinterfaces %s\n' "$MARKER" "$DENY_ENTRY" >> "$DHCPCD_CONF"
-}
-
-case "$METHOD" in
-    static|manual)
-        add_deny_entry
-        ;;
-    dhcp)
-        remove_deny_entry
-        ;;
-esac
+_log_info "if-pre-up hook finished for $IFACE"
 
 exit 0

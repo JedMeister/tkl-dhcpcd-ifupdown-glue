@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# /etc/network/if-post-down.d/dhcpcd-sync
+#
+# Hook script provided by the 'tkl-dhcpcd-ifupdown-glue' package and part of
+# TurnKey GNU/Linux network configuration.
+#
+# Removes denyinterfaces entry when interface is deconfigured.
+# This ensures dhcp works again if the interface is later reconfigured to dhcp
+# without an ifup cycle (e.g. manual dhcpcd invocation).
+
+# shellcheck source=share/helper
+source /usr/share/tkl-dhcpcd-ifupdown-glue/helper
+
+_log_info "if-post-down hook running for $IFACE"
+
+_init "$IFACE"
+
+# get ipv4 & ipv6 interfaces file lines for this interface
+iface6=$(grep --max-count=1 "^iface $IFACE inet6" "$iface_file")
+iface4=$(grep "^iface $IFACE inet" "$iface_file" \
+    | grep --invert-match "inet6" | head -1)
+
+for line in "$iface4" "$iface6"; do
+    # first 2 elements will be 'iface' & $IFACE so aren't needed
+    read -r _ _ inet method <<< "$line"
+    if [[ "$method" == "dhcp" ]]; then
+        _log_info "$IFACE is dhcp - nothing to do"
+        continue
+    fi 
+    case "$inet" in
+        inet)
+            _ipv="ip4"
+            ;;
+        inet6)
+            _ipv="ip6"
+            ;;
+        *)
+            _log_warning "Unexpected value interface line for $IFACE: '$inet'"
+            exit 0
+            ;;
+    esac
+    if [[ "$method" == "dhcp" ]]; then
+        _log_info "$IFACE $_ipv is dhcp - nothing to do"
+        continue
+    fi 
+
+done
+
+MARKER="# ifupdown-managed: ${IFACE} ${_ipv}"
+sed -i "/^${MARKER}$/{N;d}" "$DHCPCD_CONF"
+
+exit 0
