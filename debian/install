@@ -1,4 +1,4 @@
 if-pre-up.d/dhcpcd-sync     etc/network/if-pre-up.d/
 if-post-down.d/dhcpcd-sync  etc/network/if-post-down.d/
-lib/*                       usr/lib/tkl-dhcpcd-ifupdown-glue/
+lib/*                       usr/lib/dhcpcd-ifupdown-glue/
 README.md                   usr/share/doc/tkl-dhcpcd-ifupdown-glue/

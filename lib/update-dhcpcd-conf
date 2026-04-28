@@ -3,15 +3,15 @@
 DHCPCD_CONF=/etc/dhcpcd.conf
 
 _log() {
-    logger --tag=dhcp-ifupdown-glue "$*"
+    logger --tag=dhcpcd-ifupdown-glue "$*"
 }
 
 _log_warn() {
-    logger --tag=dhcp-ifupdown-glue --priority warning "$*"
+    logger --tag=dhcpcd-ifupdown-glue --priority warning "$*"
 }
 
 _log_err() {
-    logger --tag=dhcp-ifupdown-glue --priority err "$*"
+    logger --tag=dhcpcd-ifupdown-glue --priority err "$*"
     exit 1
 }
 

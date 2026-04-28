@@ -18,7 +18,7 @@ _info() {
 }
 
 _warn() {
-    logger --tag=dhcp-ifupdown-glue --priority warning "$*"
+    logger --tag=dhcpcd-ifupdown-glue --priority warning "$*"
 }
 
 _info "if-pre-up hook running for $IFACE"
