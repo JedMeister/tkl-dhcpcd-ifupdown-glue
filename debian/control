@@ -14,7 +14,7 @@ Architecture: all
 Depends:
  ${misc:Depends},
  dhcpcd-base,
- ifupdown-ng,
+ ifupdown-ng-compat,
 Description: Glue hooks to sync dhcpcd.conf & /etc/network/interfaces
  Provides ifupdown glue hook scripts to keep dhcpcd.conf and
  /etc/network/interfaces in sync.
