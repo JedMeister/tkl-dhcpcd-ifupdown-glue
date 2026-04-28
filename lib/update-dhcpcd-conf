@@ -1,0 +1,50 @@
+#!/bin/bash
+
+DHCPCD_CONF=/etc/dhcpcd.conf
+
+_log() {
+    logger --tag=dhcp-ifupdown-glue "$*"
+}
+
+_log_warn() {
+    logger --tag=dhcp-ifupdown-glue --priority warning "$*"
+}
+
+_log_err() {
+    logger --tag=dhcp-ifupdown-glue --priority err "$*"
+    exit 1
+}
+
+add_dhcp_deny() {
+    local iface=$1
+    local ipv=$2
+    _log "adding deny dhcp config for ${iface} (${ipv}) to $DHCPCD_CONF"
+    local marker="# ifupdown-managed: ${iface} ${ipv} - edit /etc/network/interfaces"
+    local deny_conf="${ipv}:${iface}"
+    printf '\n%s\ndenyinterfaces %s\n' "$marker" "$deny_conf" >> "$DHCPCD_CONF"
+}
+
+remove_deny_entry() {
+    local iface=$1
+    local ipv=$2
+    _log "cleaning deny dhcp config for ${iface} (${ipv}) from $DHCPCD_CONF"
+}
+
+[[ $# -eq 3 ]] || _log_err "dhcpcd-ifupdown-glue requires 3 args - got $# ($*)"
+
+_action=$1
+_iface=$2
+_ipv=$3
+
+case $_action in
+    add-deny-dhcp)
+        remove_deny_entry "$_iface" "$_ipv"
+        add_dhcp_deny "$_iface" "$_ipv"
+        ;;
+    remove-deny-dhcp)
+        remove_deny_entry "$_iface" "$_ipv"
+        ;;
+    *)
+        _log_err "Unexpected action: $_action"
+        ;;
+esac

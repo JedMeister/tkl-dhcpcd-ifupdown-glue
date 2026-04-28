@@ -9,18 +9,23 @@
 # This ensures dhcp works again if the interface is later reconfigured to dhcp
 # without an ifup cycle (e.g. manual dhcpcd invocation).
 
-# shellcheck source=share/helper
-source /usr/share/tkl-dhcpcd-ifupdown-glue/helper
+update_dhcpcd_conf=/usr/lib/dhcpcd-ifupdown-glue/update-dhcpcd-conf
 
-_log_info "if-post-down hook running for $IFACE"
+_info() {
+    logger --tag=dhcpcd-ifupdown-glue "$*"
+}
 
-_init "$IFACE"
+_info "if-post-down hook running for $IFACE"
+
+if [[ "$IFACE" == "lo" ]]; then
+    _info "nothing to do for 'lo'"
+    exit 0
+fi
 
 for _ipv in ip4 ip6; do
-    _log_info "clearing $IFACE $_ipv related config from $DHCPCD_CONF (if found)"
-    remove_deny_entry "$IFACE" $_ipv
+    $update_dhcpcd_conf remove-deny-dhcp "$IFACE" $_ipv
 done
 
-_log_info "if-post-down hook finished for $IFACE"
+_info "if-post-down hook finished for $IFACE"
 
 exit 0

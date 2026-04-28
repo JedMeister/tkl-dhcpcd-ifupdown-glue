@@ -9,25 +9,38 @@
 # interfaces configured as static are not also managed by dhcpcd.
 
 # shellcheck source=share/helper
-source /usr/share/tkl-dhcpcd-ifupdown-glue/helper
 
-_log_info "if-pre-up hook running for $IFACE"
+ifaces_file="${INTERFACES_FILE:-/etc/network/interfaces}"
+update_dhcpcd_conf=/usr/lib/dhcpcd-ifupdown-glue/update-dhcpcd-conf
 
-_init "$IFACE"
+_info() {
+    logger --tag=dhcpcd-ifupdown-glue "$*"
+}
 
-for info in _iface4_method _iface6_method; do
-    read -r ipv method <<<"$info"
-    # remove the entry if it exists regardless
-    remove_deny_entry "$IFACE" "$ipv"
-    if [[ "$method" == "dhcp" ]]; then
-        _log_info "$IFACE $ipv is dhcp - nothing to do"
-        continue
+_warn() {
+    logger --tag=dhcp-ifupdown-glue --priority warning "$*"
+}
+
+_info "if-pre-up hook running for $IFACE"
+if [[ "$IFACE" == "lo" ]]; then
+    _info "nothing to do for 'lo'"
+    exit 0
+fi
+
+for _inet in inet inet6; do
+    [[ "$_inet" == "inet" ]] && _ipv=ip4 || _ipv=ip6
+    iface_mode="$( \
+        sed -En "s|^iface $IFACE $_inet ([a-z]+)|\1|p" "$ifaces_file" \
+        | head -1)"
+    if [[ -z "$iface_mode" ]]; then
+        _warn "No $_ipv iface mode info found for $IFACE"
+    elif [[ "$iface_mode" == "dhcp" ]]; then
+        $update_dhcpcd_conf remove-deny-dhcp "$IFACE" "$_ipv"
     else
-        _log_info "$IFACE $ipv is ${method} - disabling dhcp"
-        add_deny_entry "$IFACE" "$ipv"
+        $update_dhcpcd_conf add-deny-dhcp "$IFACE" "$_ipv"
     fi
 done
 
-_log_info "if-pre-up hook finished for $IFACE"
+_info "if-pre-up hook finished for $IFACE"
 
 exit 0
