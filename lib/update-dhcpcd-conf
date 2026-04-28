@@ -28,6 +28,10 @@ remove_deny_entry() {
     local iface=$1
     local ipv=$2
     _log "cleaning deny dhcp config for ${iface} (${ipv}) from $DHCPCD_CONF"
+    local marker="# ifupdown-managed: ${iface} ${ipv} - edit /etc/network/interfaces"
+    sed -i "/^${marker}$/{N;d}" "$DHCPCD_CONF"
+    # clear all blank lines at end of file
+    sed -i -e :a -e '\|^\n*$|{$d;N;ba' -e '}' "$DHCPCD_CONF"
 }
 
 [[ $# -eq 3 ]] || _log_err "dhcpcd-ifupdown-glue requires 3 args - got $# ($*)"
