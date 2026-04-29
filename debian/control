@@ -13,18 +13,19 @@ Package: tkl-dhcpcd-ifupdown-glue
 Architecture: all
 Depends:
  ${misc:Depends},
+Recommends:
  dhcpcd-base,
+ ifupdown-ng,
  ifupdown-ng-compat,
 Description: Glue hooks to sync dhcpcd.conf & /etc/network/interfaces
  Provides ifupdown glue hook scripts to keep dhcpcd.conf and
  /etc/network/interfaces in sync.
  .
- If an interface is configured as either "static" or "manual", 'ifup'
- dynamically adds config to /etc/dhcpcd.conf to disable DHCP for that
- interface.
+ If an 'auto' interface is configured as anything other than "dhcp", an
+ 'if-pre-up' hook dynamically adds config to /etc/dhcpcd.conf to disable
+ DHCP for that interface. IPv4 and IPv6 are handled separately, so DHCP
+ can be configured differently - even on the same interface.
  .
- When an interface is bought down, config is removed from /etc/dhcpcd.conf
- to ensure that manually invoking 'dhcpcd' still works as expected.
- .
- Supports enabling/disabling IPv4 and IPv6 DHCP separately via interfaces
- file.
+ When an interface is bought down, an 'if-post-down' hook removes all
+ dynamically added /etc/dhcpcd.conf config. This ensure that the system
+ should always be in a state that most users would expect.
