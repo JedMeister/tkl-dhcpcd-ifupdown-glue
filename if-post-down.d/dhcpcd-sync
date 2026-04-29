@@ -22,7 +22,7 @@ if [[ "$IFACE" == "lo" ]]; then
     exit 0
 fi
 
-for _ipv in ip4 ip6; do
+for _ipv in ipv4 ipv6; do
     $update_dhcpcd_conf remove-deny-dhcp "$IFACE" $_ipv
 done
 

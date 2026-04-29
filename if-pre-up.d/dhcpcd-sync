@@ -28,7 +28,7 @@ if [[ "$IFACE" == "lo" ]]; then
 fi
 
 for _inet in inet inet6; do
-    [[ "$_inet" == "inet" ]] && _ipv=ip4 || _ipv=ip6
+    [[ "$_inet" == "inet" ]] && _ipv=ipv4 || _ipv=ipv6
     iface_mode="$( \
         sed -En "s|^iface $IFACE $_inet ([a-z]+)|\1|p" "$ifaces_file" \
         | head -1)"

@@ -20,8 +20,7 @@ add_dhcp_deny() {
     local ipv=$2
     _log "adding deny dhcp config for ${iface} (${ipv}) to $DHCPCD_CONF"
     local marker="# ifupdown-managed: ${iface} ${ipv} - edit /etc/network/interfaces"
-    local deny_conf="${ipv}:${iface}"
-    printf '\n%s\ndenyinterfaces %s\n' "$marker" "$deny_conf" >> "$DHCPCD_CONF"
+    printf '\n%s\ninterface %s\n%s\n' "$marker" "$iface" "no${ipv}" >> "$DHCPCD_CONF"
 }
 
 remove_deny_entry() {
@@ -29,7 +28,7 @@ remove_deny_entry() {
     local ipv=$2
     _log "cleaning deny dhcp config for ${iface} (${ipv}) from $DHCPCD_CONF"
     local marker="# ifupdown-managed: ${iface} ${ipv} - edit /etc/network/interfaces"
-    sed -i "\|^${marker}$|{N;d}" "$DHCPCD_CONF"
+    sed -i "\|^${marker}$|{N;N;d}" "$DHCPCD_CONF"
     # clear all blank lines at end of file
     sed -i -e :a -e '\|^\n*$|{$d;N;ba' -e '}' "$DHCPCD_CONF"
 }
