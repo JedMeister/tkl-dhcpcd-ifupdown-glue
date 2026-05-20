@@ -34,6 +34,11 @@ for _inet in inet inet6; do
         | head -1)"
     if [[ -z "$iface_mode" ]]; then
         _warn "No $_ipv iface mode info found for $IFACE"
+        if [[ "$_ipv" == "ipv6" ]]; then
+            # only auto disable for IPv6
+            _warn "Assuming IPv6 DHCP should be disabled for $IFACE"
+            $update_dhcpcd_conf add-deny-dhcp "$IFACE" "$_ipv"
+        fi
     elif [[ "$iface_mode" == "dhcp" ]]; then
         $update_dhcpcd_conf remove-deny-dhcp "$IFACE" "$_ipv"
     else
