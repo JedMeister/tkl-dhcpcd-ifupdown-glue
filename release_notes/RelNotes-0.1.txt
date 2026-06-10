@@ -1,0 +1,8 @@
+v0.1 Release Notes
+==================
+
+Initial release of dhcpd-ifupdown tool.
+
+* Provide support for disabling DHCP when static IP is set in
+  /etc/network/interfaces file - automatically applied with ifup and removed
+  with ifdown.

@@ -1,0 +1,4 @@
+v0.1.1 Release Notes
+====================
+
+* Automatically disable DHCP if no IPv6 config in /etc/network/interfaces file.
