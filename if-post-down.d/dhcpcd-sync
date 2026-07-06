@@ -15,10 +15,17 @@ _info() {
     logger --tag=dhcpcd-ifupdown-glue "$*"
 }
 
-_info "if-post-down hook running for $IFACE"
+_warn() {
+    logger --tag=dhcpcd-ifupdown-glue --priority warning "$*"
+}
+
+_info "if-post-down hook running for iface: $IFACE"
 
 if [[ "$IFACE" == "lo" ]]; then
     _info "nothing to do for 'lo'"
+    exit 0
+elif [[ -z "$IFACE" ]]; then
+    _warn "IFACE is empty - refusing to touch dhcpcd.conf"
     exit 0
 fi
 
@@ -26,6 +33,6 @@ for _ipv in ipv4 ipv6; do
     $update_dhcpcd_conf remove-deny-dhcp "$IFACE" $_ipv
 done
 
-_info "if-post-down hook finished for $IFACE"
+_info "if-post-down hook finished for iface: $IFACE"
 
 exit 0

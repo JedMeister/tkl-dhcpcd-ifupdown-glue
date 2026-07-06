@@ -21,9 +21,12 @@ _warn() {
     logger --tag=dhcpcd-ifupdown-glue --priority warning "$*"
 }
 
-_info "if-pre-up hook running for $IFACE"
+_info "if-pre-up hook running for iface: $IFACE"
 if [[ "$IFACE" == "lo" ]]; then
     _info "nothing to do for 'lo'"
+    exit 0
+elif [[ -z "$IFACE" ]]; then
+    _warn "IFACE is empty - refusing to touch dhcpcd.conf"
     exit 0
 fi
 
@@ -46,6 +49,6 @@ for _inet in inet inet6; do
     fi
 done
 
-_info "if-pre-up hook finished for $IFACE"
+_info "if-pre-up hook finished for iface: $IFACE"
 
 exit 0
